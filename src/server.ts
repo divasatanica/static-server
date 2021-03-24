@@ -1,28 +1,46 @@
 import * as http from 'http';
-import { IServerOptions, IMiddleWare } from './interfaces/server';
+import { IServerOptions, IMiddleWare, IContext } from './interfaces/server';
+import { Middlewares } from './middleware-manager';
 
 class Server {
+  private options: IServerOptions;
+  private next: (ctx: IContext) => void;
+  private middlewareMgr: Middlewares;
   constructor(options: IServerOptions) {
-    this.setup(options);
+    this.options = options;
   }
 
-  private setup(options: IServerOptions) {
-    const { port, listeningCallback } = options;
+  setup() {
+    const { port, listeningCallback } = this.options;
+    this.next = this.middlewareMgr.applyMiddlewares();
     http.createServer(async (_, res) => {
-      res.end('Hello world');
       const ctx = {
         res,
-        req: _
+        req: _,
+        body: {} as any,
+        serverOptions: this.options
+      };
+      await this.next(ctx);
+
+      if (ctx.body == null) {
+        res.end('');
+        return;
       }
 
-      
+      if (ctx.body.readable) {
+        ctx.body.pipe(res);
+      } else {
+        res.end(ctx.body);
+      }
     }).listen({
       port
     }, listeningCallback);
   }
 
-  use(middleware: IMiddleWare) {
-    console.log(middleware);
+  applyMiddleware(middlewares: IMiddleWare[]) {
+    if (!this.middlewareMgr) {
+      this.middlewareMgr = new Middlewares(middlewares);
+    }
   }
 }
 
