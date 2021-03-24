@@ -1,0 +1,15 @@
+{
+  "name": "@vergiss/static",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^14.14.35",
+    "concurrently": "^6.0.0",
+    "typescript": "^4.2.3"
+  },
+  "scripts": {
+    "dev:compile": "tsc -w",
+    "dev:setup-server": "node ./index.js"
+  }
+}
