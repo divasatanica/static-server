@@ -1,15 +1,18 @@
 import { Server } from './server';
 import {
   Logger,
-  StaticRoutes
+  StaticRoutes,
+  CacheControl
 } from './middlewares/index'
 
 const Middlewares = {
   Logger,
-  StaticRoutes
+  StaticRoutes,
+  CacheControl
 }
 
 export {
   Server,
-  Middlewares
+  Middlewares,
+  CacheControl
 }

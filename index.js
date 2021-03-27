@@ -1,6 +1,6 @@
 const { Server: StaticServer, Middlewares } = require('./dist/index');
 
-const port = 3000
+const port = 5000
 const callback = () => {
   console.log('Static Server Listening on', port);
 }
@@ -12,6 +12,7 @@ const server = new StaticServer({
 
 server.applyMiddleware([
   Middlewares.Logger(console),
+  Middlewares.CacheControl(),
   Middlewares.StaticRoutes
 ])
 

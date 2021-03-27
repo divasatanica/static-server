@@ -3,6 +3,7 @@ import * as http from 'http';
 export interface IServerOptions {
   port: number;
   assetsRoot: string;
+  timeout?: number;
   listeningCallback?: () => void;
 }
 

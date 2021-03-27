@@ -1,6 +1,7 @@
 import * as http from 'http';
 import { IServerOptions, IMiddleWare, IContext } from './interfaces/server';
 import { Middlewares } from './middleware-manager';
+import { Timeout } from './middlewares/index'
 
 class Server {
   private options: IServerOptions;
@@ -21,7 +22,6 @@ class Server {
         serverOptions: this.options
       };
       await this.next(ctx);
-
       if (ctx.body == null) {
         res.end('');
         return;
@@ -39,7 +39,11 @@ class Server {
 
   applyMiddleware(middlewares: IMiddleWare[]) {
     if (!this.middlewareMgr) {
-      this.middlewareMgr = new Middlewares(middlewares);
+      const { timeout = 3000 } = this.options
+      this.middlewareMgr = new Middlewares([
+        Timeout({ timeout }),
+        ...middlewares
+      ]);
     }
   }
 }
