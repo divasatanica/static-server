@@ -5,6 +5,7 @@ export interface IServerOptions {
   assetsRoot: string;
   timeout?: number;
   listeningCallback?: () => void;
+  errorHandler?: (e: Error) => void;
 }
 
 export interface IMiddleWare {

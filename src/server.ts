@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { IServerOptions, IMiddleWare, IContext } from './interfaces/server';
 import { Middlewares } from './middleware-manager';
-import { Timeout } from './middlewares/index'
+import { Timeout, ErrorBoundary } from './middlewares/index'
 
 class Server {
   private options: IServerOptions;
@@ -39,8 +39,9 @@ class Server {
 
   applyMiddleware(middlewares: IMiddleWare[]) {
     if (!this.middlewareMgr) {
-      const { timeout = 3000 } = this.options
+      const { timeout = 3000, errorHandler = void 0 } = this.options
       this.middlewareMgr = new Middlewares([
+        ErrorBoundary({ errorHandler }),
         Timeout({ timeout }),
         ...middlewares
       ]);
