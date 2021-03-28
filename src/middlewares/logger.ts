@@ -10,8 +10,9 @@ export function Logger(logger = console) {
     const { req } = ctx;
     const { method, url } = req;
     const traceId = `${Date.now()}___${uuid(5)}`;
+    const now = Date.now();
     logger.log(sign, inSign, traceId, inSign, new Date().toISOString(), method, url);
     await next(ctx);
-    logger.log(sign, outSign, traceId, outSign, new Date().toISOString(), method, url);
+    logger.log(sign, outSign, traceId, outSign, new Date().toISOString(), method, url, 'Time cost:', Date.now() - now, 'ms');
   }
 }

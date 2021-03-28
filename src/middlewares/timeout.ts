@@ -16,7 +16,7 @@ export function Timeout(config = { timeout: 3000 }) {
 
     if (hasTimeout) {
       ctx.body = 'Timeout';
-      ctx.res.statusCode = 500;
+      ctx.res.statusCode = 503;
     }
   }
 }
