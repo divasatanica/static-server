@@ -1,13 +1,18 @@
 {
-  "name": "@vergiss/static",
+  "name": "@vergiss/static-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^14.14.35",
     "concurrently": "^6.0.0",
     "typescript": "^4.2.3"
   },
+  "files": [
+    "dist",
+    "package.json",
+    "README.md"
+  ],
   "scripts": {
     "dev:compile": "tsc -w",
     "dev:setup-server": "node ./index.js"
