@@ -3,7 +3,7 @@ import { IServerOptions, IMiddleWare, IContext } from './interfaces/server';
 import { Middlewares } from './middleware-manager';
 
 class Server {
-  private options: IServerOptions;
+  public options: IServerOptions;
   private next: (ctx: IContext) => void;
   private middlewareMgr: Middlewares;
   constructor(options: IServerOptions) {

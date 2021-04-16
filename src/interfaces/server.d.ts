@@ -8,6 +8,10 @@ export interface IServerOptions {
   errorHandler?: (e: Error) => void;
 }
 
+export interface IClusterServerOptions extends IServerOptions {
+  workerNum?: number;
+}
+
 export interface IMiddleWare {
   (ctx: IContext, next?: IMiddleWare): any;
 }

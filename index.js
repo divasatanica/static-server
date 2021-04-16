@@ -1,12 +1,9 @@
 const path = require('path');
-const { Server: StaticServer, Middlewares } = require('./dist/index');
+const { ClusterServer: StaticServer, Middlewares } = require('./dist/index');
 
 const port = 5000
 const timeout = 3000
-const callback = (err) => {
-  if (err) {
-    console.error('Static Server Booting Error:', err);
-  }
+const callback = () => {
   console.log('Static Server Listening on', port);
 }
 const errorHandler = e => {
@@ -15,7 +12,8 @@ const errorHandler = e => {
 
 const server = new StaticServer({
   port,
-  assetsRoot: path.resolve(__dirname, './public')
+  assetsRoot: path.resolve(__dirname, './public'),
+  workerNum: 8
 });
 
 server.applyMiddleware([
