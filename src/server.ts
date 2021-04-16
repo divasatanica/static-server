@@ -1,7 +1,6 @@
 import * as http from 'http';
 import { IServerOptions, IMiddleWare, IContext } from './interfaces/server';
 import { Middlewares } from './middleware-manager';
-import { Timeout, ErrorBoundary } from './middlewares/index'
 
 class Server {
   private options: IServerOptions;
@@ -11,8 +10,8 @@ class Server {
     this.options = options;
   }
 
-  setup() {
-    const { port, listeningCallback } = this.options;
+  setup(listeningCallback?: () => void) {
+    const { port } = this.options;
     this.next = this.middlewareMgr.applyMiddlewares();
     http.createServer(async (_, res) => {
       const ctx = {
@@ -39,10 +38,7 @@ class Server {
 
   applyMiddleware(middlewares: IMiddleWare[]) {
     if (!this.middlewareMgr) {
-      const { timeout = 3000, errorHandler = void 0 } = this.options
       this.middlewareMgr = new Middlewares([
-        ErrorBoundary({ errorHandler }),
-        Timeout({ timeout }),
         ...middlewares
       ]);
     }

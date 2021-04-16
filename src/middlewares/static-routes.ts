@@ -1,23 +1,11 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import { IContext } from '../interfaces/server';
-import { checkMimeTypes } from '../utils/mime-type';
 
-const asyncReadFile = (path: string) => new Promise((resolve, reject) => {
-  fs.readFile(path, (err, data) => {
-    if (err) {
-      reject(err);
-    }
-
-    resolve(data);
-  })
-})
-
-export function StaticRoutes(options) {
+export function StaticRoutes() {
   return async function StaticRoutesMiddleware(ctx: IContext, next: Function) {
-    const { req } = ctx;
+    const { req, serverOptions } = ctx;
     const { url } = req;
-    const { assetsRoot } = options;
+    const { assetsRoot } = serverOptions;
 
     if (!assetsRoot || typeof assetsRoot !== 'string') {
       throw new Error('AssetsRoot must be set');
@@ -38,12 +26,7 @@ export function StaticRoutes(options) {
     }
     
     try {
-      if (checkMimeTypes(path.extname(url!)) === 'text/html') {
-        ctx.body = fs.createReadStream(resourcePath);
-      } else {
-        const data = await asyncReadFile(resourcePath);
-        ctx.body = data;
-      }
+      ctx.body = fs.createReadStream(resourcePath);
     } catch (e) {
       ctx.body = JSON.stringify(e);
       ctx.res.statusCode = 404;
