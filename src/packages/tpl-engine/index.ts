@@ -28,7 +28,7 @@ export function render(template: string, data: any) {
     
   });
 
-  return out.join('\n');
+  return out.join('');
 }
 
 function renderIteration(templateChunk: string[], data: any) {
