@@ -14,7 +14,7 @@ export function StaticRoutes(options) {
       throw new Error('AssetsRoot must be set');
     }
   
-    const resourcePath = assetsRoot + (url || '');
+    const resourcePath = assetsRoot + (global.decodeURIComponent(url!) || '');
     try {
       const stat = fs.lstatSync(resourcePath);
 
