@@ -19,16 +19,14 @@ export function StaticRoutes(options) {
       const stat = fs.lstatSync(resourcePath);
 
       if (stat.isDirectory()) {
-        const dir = fs.opendirSync(resourcePath);
+        const dirs = fs.readdirSync(resourcePath);
         let files = [] as any[];
-        let res;
-        while (res = dir.readSync()) {
+        dirs.forEach(value => {
           files.push({
-            path: path.join(url!, res.name),
-            name: res.name
+            path: path.join(url!, value),
+            name: value
           });
-        }
-
+        })
         ctx.body = renderTemplateWithData(template, {
           files
         });
