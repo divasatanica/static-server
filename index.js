@@ -1,5 +1,6 @@
 const path = require('path');
-const { ClusterServer: StaticServer, Middlewares } = require('./dist/index');
+const fs = require('fs');
+const { Server: StaticServer, Middlewares } = require('./dist/index');
 
 const port = 5000
 const timeout = 3000
@@ -13,7 +14,7 @@ const errorHandler = e => {
 const server = new StaticServer({
   port,
   assetsRoot: path.resolve(__dirname, './public'),
-  workerNum: 8
+  workerNum: 8,
 });
 
 server.applyMiddleware([
@@ -26,7 +27,9 @@ server.applyMiddleware([
     ]
   }),
   Middlewares.CacheControl(),
-  Middlewares.StaticRoutes()
+  Middlewares.StaticRoutes({
+    template: fs.readFileSync(path.resolve(__dirname, './static/template.html')).toString('utf-8')
+  })
 ])
 
 try {
