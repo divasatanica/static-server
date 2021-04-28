@@ -46,5 +46,9 @@
     <li class="pwd-item"><a class="item-link" href="..">..</a></li>
     <% for {{ file }} in {{ files }} => <li class="pwd-item"><a class="item-link" href="{{file.path}}">{{file.name}}</a></li> %>
   </ul>
+  <!-- <% if {{ this.files.length > 0 }} => <p>Congratulations! - The length is {{this.files.length}}</p>%>
+  <% elif {{ this.files.length > 2 }} => <p>Congratulations!!</p>%>
+  <% else => <p>Congratulations!!!</p> %> -->
+  <% <p>Total Files: {{ files.length }}</p> %>
 </body>
 </html>
