@@ -86,12 +86,10 @@ function parseTemplate(template: string): IToken[] {
         if (conditionChunks.length > 0) {
           // Case for processing last condition block without any 'else'
           tokens.push(
-            ...conditionChunks.map(item => {
-              return {
-                token: item,
-                type: TYPE_TOKEN_CONDITION
-              }
-            })
+            {
+              token: conditionChunks,
+              type: TYPE_TOKEN_CONDITION
+            }
           );
           conditionChunks = [];
         }
