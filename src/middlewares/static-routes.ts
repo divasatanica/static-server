@@ -28,7 +28,10 @@ export function StaticRoutes(options) {
           });
         })
         ctx.body = renderTemplateWithData(template, {
-          files
+          files,
+          currentDirectory: global.decodeURIComponent(url!)
+        }, {
+          uglify: true
         });
         ctx.res.statusCode = 200;
         await next(ctx);

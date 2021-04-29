@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Static-Server</title>
+  <% <title>Files under {{this.currentDirectory}}</title> %>
   <style>
     li {
       text-decoration: none;
@@ -39,16 +39,16 @@
       margin-right: 10px;
     }
   </style>
-  <link href="./css/style.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
   <ul>
     <li class="pwd-item"><a class="item-link" href="..">..</a></li>
-    <% for {{ file }} in {{ files }} => <li class="pwd-item"><a class="item-link" href="{{file.path}}">{{file.name}}</a></li> %>
+    <% for {{ file }} in {{ this.files }} => <li class="pwd-item"><a class="item-link" href="{{file.path}}">{{file.name}}</a></li> %>
   </ul>
   <!-- <% if {{ this.files.length > 0 }} => <p>Congratulations! - The length is {{this.files.length}}</p>%>
   <% elif {{ this.files.length > 2 }} => <p>Congratulations!!</p>%>
   <% else => <p>Congratulations!!!</p> %> -->
-  <% <p>Total Files: {{ files.length }}</p> %>
+  <% <p>Total Files: {{ this.files.length }}</p> %>
 </body>
 </html>
