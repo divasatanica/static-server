@@ -1,8 +1,5 @@
+import { IToken, IDataPropInfo, IIterationItem, IConditionItem } from './type';
 import {
-  IToken,
-  IDataPropInfo,
-  IIterationItem,
-  IConditionItem,
   TYPE_TOKEN_CONDITION,
   TYPE_TOKEN_DATA_PROP,
   TYPE_TOKEN_ITERATION,

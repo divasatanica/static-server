@@ -1,3 +1,5 @@
+import { IToken, IDataPropInfo, IIterationItem } from './type';
+
 const dslReg = /\<%(.+)\%\>/;
 const dataReg = /{{([\$|\w|\s|\.])+}}/g;
 const descReg = /^<!--/;
@@ -17,34 +19,6 @@ const TYPE_CONDITION_ITEM_ELSE = Symbol('conditionItemElse');
 
 const TYPE_DATA_PROP_INFO = Symbol('dataPropInfo');
 const TYPE_ITERATION_ITEM = Symbol('iterationItem');
-
-export interface IConditionItem {
-  condition: string;
-  result: IDataPropInfo;
-  type: symbol;
-}
-
-export interface IIterationItem {
-  itemName: string;
-  scope: string[];
-  template: string | IDataPropInfo;
-}
-
-interface IDataPropItem {
-  propPath: string[];
-  match: string;
-}
-
-export interface IDataPropInfo {
-  template: string;
-  props: IDataPropItem[];
-  type: symbol;
-}
-
-export interface IToken {
-  type: symbol;
-  token: string | IConditionItem[] | IDataPropInfo | IIterationItem;
-}
 
 function parseTemplate(template: string): IToken[] {
   const tokens = [] as any[];
