@@ -1,4 +1,5 @@
-import { IToken, IDataPropInfo, IIterationItem } from './type';
+import { EventEmitter } from 'events';
+import { IDataPropInfo, IIterationItem } from './type';
 
 const dslReg = /\<%(.+)\%\>/;
 const dataReg = /{{([\$|\w|\s|\.])+}}/g;
@@ -20,141 +21,144 @@ const TYPE_CONDITION_ITEM_ELSE = Symbol('conditionItemElse');
 const TYPE_DATA_PROP_INFO = Symbol('dataPropInfo');
 const TYPE_ITERATION_ITEM = Symbol('iterationItem');
 
-function parseTemplate(template: string): IToken[] {
-  const tokens = [] as any[];
-  let conditionChunks = [] as any[];
-  let descChunks = [] as any[];
+export const EVENT_TOKEN_GENERATED = 'tokenGenerated';
+export const EVENT_PARSING_END = 'parsingEnd';
 
-  const templates = template.split('\n');
-  for (let i = 0, len = templates.length; i < len; i ++) {
-    const chunk = templates[i].trim();
-    let _chunk = chunk.trim();
-    if (descChunks.length > 0) {
-      if (checkDescEnd(_chunk)) {
-        descChunks = [];
-      }
-      continue;
-    }
-    if (!dslReg.test(_chunk)) {
-      tokens.push({
-        token: _chunk,
-        type: TYPE_TOKEN_NORMAL
-      });
-      continue;
-    } else if (checkDescStart(chunk)) {
-      // Case for single line description.
-      if (checkDescEnd(chunk)) {
-        descChunks = [];
+export class Parser extends EventEmitter {
+  constructor() {
+    super();
+  }
+
+  parseTemplate(template: string) {
+    let conditionChunks = [] as any[];
+    let descChunks = [] as any[];
+  
+    const templates = template.split('\n');
+    for (let i = 0, len = templates.length; i < len; i ++) {
+      const chunk = templates[i].trim();
+      let _chunk = chunk.trim();
+      if (descChunks.length > 0) {
+        if (checkDescEnd(_chunk)) {
+          descChunks = [];
+        }
         continue;
       }
-      descChunks.push(chunk);
-      continue;
-    } else if (checkDescEnd(chunk)) {
-      throw new Error('Unexpected end of description');
-    }
-
-    _chunk = _chunk.match(dslReg)![1].trim();
-
-    switch (true) {
-
-      case (checkIfBlock(_chunk)): {
-        if (conditionChunks.length > 0) {
-          // Case for processing last condition block without any 'else'
-          tokens.push(
-            {
-              token: conditionChunks,
-              type: TYPE_TOKEN_CONDITION
-            }
-          );
-          conditionChunks = [];
-        }
-        const startIfMatch = _chunk.match(conditionIfReg);
-        if (startIfMatch) {
-          const conditionItem = {
-            condition: startIfMatch[1].trim(),
-            result: parseDataProp(startIfMatch[2].trim()),
-            type: TYPE_CONDITION_ITEM_IF
-          };
-          conditionChunks.push(conditionItem);
-        }
-        break;
-      }
-
-      case (checkElseIfBlock(_chunk)): {
-        if (conditionChunks.length === 0) {
-          throw new Error(`Unmatched elif statement at line ${i + 1}`);
-        }
-        const elseIfMatch = _chunk.match(conditionElseIfReg);
-        if (elseIfMatch) {
-          const conditionItem = {
-            condition: elseIfMatch[1].trim(),
-            result: parseDataProp(elseIfMatch[2].trim()),
-            type: TYPE_CONDITION_ITEM_ELSEIF
-          };
-    
-          conditionChunks.push(conditionItem);
-        }
-        break;
-      }
-
-      case (checkElseBlock(_chunk)): {
-        if (conditionChunks.length === 0) {
-          throw new Error(`Unmatched else statement at line ${i + 1}`);
-        }
-
-        const elseMatch = _chunk.match(conditionElseReg);
-        if (elseMatch) {
-          const conditionItem = {
-            condition: '',
-            result: parseDataProp(elseMatch[1].trim()),
-            type: TYPE_CONDITION_ITEM_ELSE
-          };
-          conditionChunks.push(conditionItem);
-        }
-        break;
-      }
-
-      case (checkEndIfBlock(_chunk)): {
-        if (conditionChunks.length === 0) {
-          throw new Error(`Unmatched endif statement at line ${i + 1}`);
-        }
-
-        tokens.push(
-          {
-            token: conditionChunks,
-            type: TYPE_TOKEN_CONDITION
-          }
-        );
-        conditionChunks = [];
-        break;
-      }
-
-      case (checkIteration(_chunk)): {
-        tokens.push({
-          token: parseIteration(_chunk),
-          type: TYPE_TOKEN_ITERATION
-        });
-        break;
-      }
-
-      case (checkDataProp(_chunk)): {
-        tokens.push({
-          token: parseDataProp(_chunk),
-          type: TYPE_TOKEN_DATA_PROP
-        })
-        break;
-      }
-      
-      default: {
-        tokens.push({
+      if (!dslReg.test(_chunk)) {
+        this.emit(EVENT_TOKEN_GENERATED, {
           token: _chunk,
           type: TYPE_TOKEN_NORMAL
         });
+        continue;
+      } else if (checkDescStart(chunk)) {
+        // Case for single line description.
+        if (checkDescEnd(chunk)) {
+          descChunks = [];
+          continue;
+        }
+        descChunks.push(chunk);
+        continue;
+      } else if (checkDescEnd(chunk)) {
+        throw new Error('Unexpected end of description');
+      }
+  
+      _chunk = _chunk.match(dslReg)![1].trim();
+  
+      switch (true) {
+  
+        case (checkIfBlock(_chunk)): {
+          if (conditionChunks.length > 0) {
+            // Case for processing last condition block without any 'else'
+            this.emit(EVENT_TOKEN_GENERATED, {
+              token: conditionChunks,
+              type: TYPE_TOKEN_CONDITION
+            });
+            conditionChunks = [];
+          }
+          const startIfMatch = _chunk.match(conditionIfReg);
+          if (startIfMatch) {
+            const conditionItem = {
+              condition: startIfMatch[1].trim(),
+              result: parseDataProp(startIfMatch[2].trim()),
+              type: TYPE_CONDITION_ITEM_IF
+            };
+            conditionChunks.push(conditionItem);
+          }
+          break;
+        }
+  
+        case (checkElseIfBlock(_chunk)): {
+          if (conditionChunks.length === 0) {
+            throw new Error(`Unmatched elif statement at line ${i + 1}`);
+          }
+          const elseIfMatch = _chunk.match(conditionElseIfReg);
+          if (elseIfMatch) {
+            const conditionItem = {
+              condition: elseIfMatch[1].trim(),
+              result: parseDataProp(elseIfMatch[2].trim()),
+              type: TYPE_CONDITION_ITEM_ELSEIF
+            };
+      
+            conditionChunks.push(conditionItem);
+          }
+          break;
+        }
+  
+        case (checkElseBlock(_chunk)): {
+          if (conditionChunks.length === 0) {
+            throw new Error(`Unmatched else statement at line ${i + 1}`);
+          }
+  
+          const elseMatch = _chunk.match(conditionElseReg);
+          if (elseMatch) {
+            const conditionItem = {
+              condition: '',
+              result: parseDataProp(elseMatch[1].trim()),
+              type: TYPE_CONDITION_ITEM_ELSE
+            };
+            conditionChunks.push(conditionItem);
+          }
+          break;
+        }
+  
+        case (checkEndIfBlock(_chunk)): {
+          if (conditionChunks.length === 0) {
+            throw new Error(`Unmatched endif statement at line ${i + 1}`);
+          }
+          this.emit(EVENT_TOKEN_GENERATED, {
+            token: conditionChunks,
+            type: TYPE_TOKEN_CONDITION
+          });
+          conditionChunks = [];
+          break;
+        }
+  
+        case (checkIteration(_chunk)): {
+          this.emit(EVENT_TOKEN_GENERATED, {
+            token: parseIteration(_chunk),
+            type: TYPE_TOKEN_ITERATION
+          });
+          break;
+        }
+  
+        case (checkDataProp(_chunk)): {
+          this.emit(EVENT_TOKEN_GENERATED, {
+            token: parseDataProp(_chunk),
+            type: TYPE_TOKEN_DATA_PROP
+          });
+          break;
+        }
+        
+        default: {
+          this.emit(EVENT_TOKEN_GENERATED, {
+            token: _chunk,
+            type: TYPE_TOKEN_NORMAL
+          });
+        }
       }
     }
-  }
 
-  return tokens;
+    this.emit(EVENT_PARSING_END);
+  }
 }
 
 function checkDescStart(chunk: string) {
@@ -242,6 +246,5 @@ export {
   TYPE_TOKEN_DATA_PROP,
   TYPE_CONDITION_ITEM_IF,
   TYPE_CONDITION_ITEM_ELSEIF,
-  TYPE_CONDITION_ITEM_ELSE,
-  parseTemplate
+  TYPE_CONDITION_ITEM_ELSE
 }

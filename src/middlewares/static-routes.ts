@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { IContext } from '../interfaces/server';
-import { render as renderTemplateWithData } from '../packages/tpl-engine/index';
+import { Engine } from '../packages/tpl-engine/index';
 
 export function StaticRoutes(options) {
   return async function StaticRoutesMiddleware(ctx: IContext, next: Function) {
@@ -19,20 +19,26 @@ export function StaticRoutes(options) {
       const stat = fs.lstatSync(resourcePath);
 
       if (stat.isDirectory()) {
-        const dirs = fs.readdirSync(resourcePath);
+        const dirs = fs.readdirSync(resourcePath, {
+          withFileTypes: true
+        });
         let files = [] as any[];
         dirs.forEach(value => {
+          let name = value.name;
+          if (value.isDirectory()) {
+            name += '/';
+          }
           files.push({
-            path: path.join(url!, value),
-            name: value
+            path: path.join(url!, value.name),
+            name: name
           });
         })
-        ctx.body = renderTemplateWithData(template, {
+        ctx.body = Engine.renderWithStream(template, {
           files,
           currentDirectory: global.decodeURIComponent(url!)
-        }, {
+        }/*, {
           uglify: true
-        });
+        }*/);
         ctx.res.statusCode = 200;
         await next(ctx);
         return;
