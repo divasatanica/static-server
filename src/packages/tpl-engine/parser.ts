@@ -70,6 +70,7 @@ function parseTemplate(template: string): IToken[] {
     } else if (checkDescStart(chunk)) {
       // Case for single line description.
       if (checkDescEnd(chunk)) {
+        descChunks = [];
         continue;
       }
       descChunks.push(chunk);
