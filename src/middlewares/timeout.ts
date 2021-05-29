@@ -2,14 +2,14 @@ import { IContext } from '../interfaces/server';
 
 export function Timeout(config = { timeout: 3000 }) {
   return async function TimeoutMiddleware(ctx: IContext, next: Function) {
-    const timeout = new Promise(r => {
+    const timeout = () => new Promise(r => {
       setTimeout(() => r({ hasTimeout: true }), config.timeout);
     });
-    const normalResolvedNext = next(ctx).then(() => ({ hasTimeout: false }));
+    const normalResolvedNext = () => next(ctx).then(() => ({ hasTimeout: false }));
 
     const result = await Promise.race([
-      timeout,
-      normalResolvedNext
+      timeout(),
+      normalResolvedNext()
     ]);
 
     const { hasTimeout } = result;
