@@ -21,4 +21,5 @@ export interface IContext {
   res: http.ServerResponse;
   serverOptions: IServerOptions;
   body?: any;
+  extendInfo?: any;
 }

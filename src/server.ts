@@ -18,7 +18,8 @@ class Server {
         res,
         req: _,
         body: {} as any,
-        serverOptions: this.options
+        serverOptions: this.options,
+        extendInfo: {}
       };
       await this.next(ctx);
       if (ctx.body == null) {

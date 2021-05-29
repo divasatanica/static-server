@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { IContext } from '../interfaces/server';
 import { Engine } from '../packages/tpl-engine/index';
+import { getMD5 } from '../packages/utils/md5';
 
 export function StaticRoutes(options) {
   return async function StaticRoutesMiddleware(ctx: IContext, next: Function) {
@@ -53,14 +54,13 @@ export function StaticRoutes(options) {
       await next(ctx);
       return;
     }
-    
-    try {
-      ctx.body = fs.createReadStream(resourcePath);
-    } catch (e) {
-      ctx.body = JSON.stringify(e);
-      ctx.res.statusCode = 404;
-    } finally {
-      await next(ctx);
-    }
+
+    const { res } = ctx;
+    const etag = await getMD5(resourcePath);
+    res.setHeader('Etag', etag);
+    ctx.extendInfo.etag = etag;
+
+    ctx.body = fs.createReadStream(resourcePath);
+    await next(ctx);
   }
 }
